@@ -2,8 +2,9 @@
 /**
  * Plugin Name: ACF Gallery Masonry + Lightbox
  * Plugin URI: https://github.com/graphikup/acf-gallery-masonry
+ * GitHub Plugin URI: https://github.com/graphikup/acf-gallery-masonry
  * Description: Shortcode [acf_gallery] pour afficher un champ Galerie ACF sous forme de grille Masonry responsive avec une lightbox.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Graphikup
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -17,7 +18,7 @@ if (!defined('ABSPATH')) {
 
 final class ACF_Gallery_Masonry_Lightbox
 {
-    public const VERSION = '1.0.1';
+    public const VERSION = '1.0.2';
     public const HANDLE  = 'acf-gallery-masonry-lightbox';
 
     /** @var bool */
