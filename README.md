@@ -3,7 +3,7 @@
 Affiche un champ **Galerie ACF** via le shortcode `[acf_gallery]` sous forme de grille **Masonry** responsive + **lightbox** (GLightbox).
 
 ## Installation
-1. Copie le dossier `acf-gallery-masonery` dans `wp-content/plugins/`
+1. Copie le dossier `acf-gallery-masonry` dans `wp-content/plugins/`
 2. Active l’extension dans WordPress
 3. Assure-toi qu’ACF est actif
 
