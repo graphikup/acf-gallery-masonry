@@ -31,7 +31,7 @@ final class ACF_Gallery_Masonry_Lightbox
     }
 
     /**
-     * Shortcode:
+     * Shortcode à utiliser:
      *   [acf_gallery field="galerie" columns="4" size="large" gap="14" class="acf-gallery-masonry"]
      */
     public function shortcode($atts): string
