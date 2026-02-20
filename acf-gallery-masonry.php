@@ -111,7 +111,7 @@ final class ACF_Gallery_Masonry_Lightbox
         }
 
         $html .= '</div>';
-
+$html .= "\n<!-- ACF Gallery Masonry v" . self::VERSION . " -->\n";
         return $html;
     }
 
