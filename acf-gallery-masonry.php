@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/graphikup/acf-gallery-masonry
  * GitHub Plugin URI: https://github.com/graphikup/acf-gallery-masonry
  * Description: Shortcode [acf_gallery] pour afficher un champ Galerie ACF sous forme de grille Masonry responsive avec une lightbox.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Graphikup
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 
 final class ACF_Gallery_Masonry_Lightbox
 {
-    public const VERSION = '1.0.2';
+    public const VERSION = '1.0.3';
     public const HANDLE  = 'acf-gallery-masonry-lightbox';
 
     /** @var bool */
@@ -63,12 +63,14 @@ final class ACF_Gallery_Masonry_Lightbox
         $columns = max(1, (int) $atts['columns']);
         $gap     = max(0, (int) $atts['gap']);
 
-        // Allow multiple classes.
+        // Allow multiple classes + always include base class (required for CSS/JS hooks).
         $classes = array_filter(preg_split('/\s+/', (string) $atts['class']));
+        $classes[] = 'acf-gallery-masonry';
+        $classes = array_unique(array_filter($classes));
         $classes = array_map('sanitize_html_class', $classes);
         $class_attr = trim(implode(' ', $classes));
 
-        // CSS variables for layout.
+        // CSS vars for layout.
         $style_attr = sprintf('--agm-cols:%d;--agm-gap:%dpx;', $columns, $gap);
 
         $html  = '<div class="' . esc_attr($class_attr) . '" style="' . esc_attr($style_attr) . '" data-gap="' . esc_attr((string) $gap) . '">';
@@ -111,7 +113,10 @@ final class ACF_Gallery_Masonry_Lightbox
         }
 
         $html .= '</div>';
-$html .= "\n<!-- ACF Gallery Masonry v" . self::VERSION . " -->\n";
+
+        // Debug marker for update tests (safe, invisible)
+        $html .= "\n<!-- ACF Gallery Masonry v" . esc_html(self::VERSION) . " -->\n";
+
         return $html;
     }
 
@@ -184,38 +189,50 @@ CSS;
 
         wp_add_inline_style(self::HANDLE, $css);
 
-        // JS init inline
+        // JS init inline (robust with footer/caching; avoids DOMContentLoaded race)
         wp_add_inline_script('glightbox', <<<JS
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
 
-  // Lightbox
-  if (window.GLightbox) {
-    GLightbox({ selector: '.acf-gallery-masonry .glightbox' });
+  function initAGM() {
+    // Avoid double init
+    if (window.__AGM_INITED) return;
+    window.__AGM_INITED = true;
+
+    // Lightbox
+    if (window.GLightbox) {
+      GLightbox({ selector: '.acf-gallery-masonry .glightbox' });
+    }
+
+    // Masonry (wait for images)
+    document.querySelectorAll('.acf-gallery-masonry').forEach(function (grid) {
+      var gap = parseInt(grid.dataset.gap || '14', 10);
+
+      var initMasonry = function () {
+        if (window.Masonry) {
+          new Masonry(grid, {
+            itemSelector: '.agm-item',
+            percentPosition: true,
+            columnWidth: '.agm-grid-sizer',
+            gutter: gap
+          });
+        }
+      };
+
+      if (window.imagesLoaded) {
+        imagesLoaded(grid, initMasonry);
+      } else {
+        initMasonry();
+      }
+    });
   }
 
-  // Masonry (wait for images)
-  document.querySelectorAll('.acf-gallery-masonry').forEach(function(grid){
-    var gap = parseInt(grid.dataset.gap || '14', 10);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAGM);
+  } else {
+    initAGM();
+  }
 
-    var initMasonry = function(){
-      if (window.Masonry) {
-        new Masonry(grid, {
-          itemSelector: '.agm-item',
-          percentPosition: true,
-          columnWidth: '.agm-grid-sizer',
-          gutter: gap
-        });
-      }
-    };
-
-    if (window.imagesLoaded) {
-      imagesLoaded(grid, initMasonry);
-    } else {
-      initMasonry();
-    }
-  });
-
-});
+})();
 JS, 'after');
     }
 }
